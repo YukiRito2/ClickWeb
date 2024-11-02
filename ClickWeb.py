@@ -27,7 +27,7 @@ while True:
     # Abre el navegador en modo incógnito
     driver = webdriver.Chrome(service=service, options=chrome_options)
     actions = ActionChains(driver)
-    wait = WebDriverWait(driver, 5)  # Espera explícita de hasta 3 segundos
+    wait = WebDriverWait(driver, 3)  # Espera explícita de hasta 3 segundos
 
     # Abre la página de votación y una pestaña en blanco adicional
     driver.get(url)
@@ -39,7 +39,7 @@ while True:
     try:
         # Carga la página principal de votación en la primera pestaña
         driver.get(url)
-        time.sleep(1)  # Espera que cargue completamente
+        time.sleep(3)  # Espera que cargue completamente
 
         # Variable de control para verificar los pasos
         votacion_exitosa = False
@@ -54,7 +54,7 @@ while True:
             )
         )
         actions.move_to_element(votar_button).click().perform()
-        time.sleep(2)
+        time.sleep(3)
 
         # Intentar cerrar el anuncio con el SVG de "X"
         try:
@@ -62,7 +62,7 @@ while True:
                 EC.element_to_be_clickable((By.XPATH, "//svg[@viewBox='0 0 48 48']"))
             )
             cerrar_anuncio.click()
-            time.sleep(1)
+            time.sleep(3)
             print("Anuncio encontrado y cerrado.")
         except:
             print(
