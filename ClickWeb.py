@@ -25,7 +25,7 @@ chrome_options.add_argument("--disable-logging")
 # Abre el navegador en modo incógnito con dos pestañas
 driver = webdriver.Chrome(service=service, options=chrome_options)
 actions = ActionChains(driver)
-wait = WebDriverWait(driver, 10)  # Espera explícita de hasta 10 segundos
+wait = WebDriverWait(driver, 3)  # Espera explícita de hasta 10 segundos
 
 # Abre dos pestañas
 driver.get(url)
@@ -39,9 +39,12 @@ while True:
     try:
         # Carga la página principal de votación en la primera pestaña
         driver.get(url)
-        time.sleep(5)  # Espera que cargue completamente
+        time.sleep(3)  # Espera que cargue completamente
 
-        # Hacer clic en el botón "VOTAR" con un XPath más específico
+        # Variable de control para verificar los pasos
+        votacion_exitosa = False
+
+        # Paso 1: Hacer clic en el botón "VOTAR"
         votar_button = wait.until(
             EC.element_to_be_clickable(
                 (
@@ -55,7 +58,6 @@ while True:
 
         # Intentar cerrar el anuncio con el SVG de "X"
         try:
-            # Intento 1: Selecciona el SVG directamente
             cerrar_anuncio = wait.until(
                 EC.element_to_be_clickable((By.XPATH, "//svg[@viewBox='0 0 48 48']"))
             )
@@ -67,7 +69,7 @@ while True:
                 "No se encontró el botón de cierre del anuncio. Continuando con el proceso de votación."
             )
 
-        # Esperar a que el botón "Sí. Votar" esté disponible y hacer clic en él
+        # Paso 2: Hacer clic en el botón "Sí. Votar"
         confirmar_button = wait.until(
             EC.element_to_be_clickable(
                 (
@@ -77,7 +79,23 @@ while True:
             )
         )
         actions.move_to_element(confirmar_button).click().perform()
-        time.sleep(3)  # Espera para que el voto se registre
+        time.sleep(2)  # Espera para que el voto se registre
+
+        # Si ambos pasos se completan sin errores, marcamos como exitosa la votación
+        votacion_exitosa = True
+
+        # Paso 3: Solo hacer clic en "Ver resultados" si los pasos anteriores fueron exitosos
+        if votacion_exitosa:
+            ver_resultados_button = wait.until(
+                EC.element_to_be_clickable(
+                    (
+                        By.XPATH,
+                        "//button[contains(@class, 'logButton') and contains(text(), 'Ver resultados')]",
+                    )
+                )
+            )
+            actions.move_to_element(ver_resultados_button).click().perform()
+            time.sleep(8)  # Espera para que los resultados se muestren
 
         # Cerrar la pestaña actual y abrir una nueva para continuar votando
         driver.close()
@@ -93,4 +111,4 @@ while True:
         print("Error en el proceso de votación:", e)
 
     # Pausa antes de reiniciar el ciclo para evitar sobrecarga en el servidor
-    time.sleep(5)
+    time.sleep(3)
