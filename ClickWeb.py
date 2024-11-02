@@ -13,33 +13,33 @@ service = Service("C:\\SeleniumDrivers\\chromedriver-win64\\chromedriver.exe")
 # URL de la página de votación
 url = "https://limakid.com/modelkid/1119871/?mlang=es"
 
-# Configura las opciones de Chrome para abrir en modo incógnito y otras opciones
-chrome_options = Options()
-chrome_options.add_argument("--incognito")
-chrome_options.add_argument("--disable-popup-blocking")
-chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-chrome_options.add_argument("--disable-gpu")
-chrome_options.add_argument("--log-level=3")
-chrome_options.add_argument("--disable-logging")
-
-# Abre el navegador en modo incógnito con dos pestañas
-driver = webdriver.Chrome(service=service, options=chrome_options)
-actions = ActionChains(driver)
-wait = WebDriverWait(driver, 3)  # Espera explícita de hasta 10 segundos
-
-# Abre dos pestañas
-driver.get(url)
-driver.execute_script("window.open('');")  # Abre una segunda pestaña en blanco
-
-# Selecciona la primera pestaña para iniciar la votación
-driver.switch_to.window(driver.window_handles[0])
-
 # Bucle para repetir el proceso de votación
 while True:
+    # Configura las opciones de Chrome para abrir en modo incógnito y otras opciones
+    chrome_options = Options()
+    chrome_options.add_argument("--incognito")
+    chrome_options.add_argument("--disable-popup-blocking")
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--log-level=3")
+    chrome_options.add_argument("--disable-logging")
+
+    # Abre el navegador en modo incógnito
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+    actions = ActionChains(driver)
+    wait = WebDriverWait(driver, 5)  # Espera explícita de hasta 3 segundos
+
+    # Abre la página de votación y una pestaña en blanco adicional
+    driver.get(url)
+    driver.execute_script("window.open('');")  # Abre una segunda pestaña en blanco
+
+    # Selecciona la primera pestaña para iniciar el proceso de votación
+    driver.switch_to.window(driver.window_handles[0])
+
     try:
         # Carga la página principal de votación en la primera pestaña
         driver.get(url)
-        time.sleep(3)  # Espera que cargue completamente
+        time.sleep(1)  # Espera que cargue completamente
 
         # Variable de control para verificar los pasos
         votacion_exitosa = False
@@ -54,7 +54,7 @@ while True:
             )
         )
         actions.move_to_element(votar_button).click().perform()
-        time.sleep(3)
+        time.sleep(2)
 
         # Intentar cerrar el anuncio con el SVG de "X"
         try:
@@ -95,20 +95,14 @@ while True:
                 )
             )
             actions.move_to_element(ver_resultados_button).click().perform()
-            time.sleep(8)  # Espera para que los resultados se muestren
+            time.sleep(4)  # Espera para que los resultados se muestren
 
-        # Cerrar la pestaña actual y abrir una nueva para continuar votando
-        driver.close()
-        driver.switch_to.window(
-            driver.window_handles[0]
-        )  # Cambiar a la otra pestaña que queda abierta
-        driver.execute_script("window.open('');")  # Abre una nueva pestaña en blanco
-        driver.switch_to.window(
-            driver.window_handles[-1]
-        )  # Cambia a la nueva pestaña para el próximo ciclo
+        # Cerrar el navegador completo después de completar la votación exitosa
+        driver.quit()
 
     except Exception as e:
         print("Error en el proceso de votación:", e)
+        driver.quit()  # Cerrar el navegador en caso de error
 
-    # Pausa antes de reiniciar el ciclo para evitar sobrecarga en el servidor
+    # Pausa antes de abrir un nuevo navegador para el siguiente ciclo de votación
     time.sleep(3)
