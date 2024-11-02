@@ -84,19 +84,6 @@ while True:
         # Si ambos pasos se completan sin errores, marcamos como exitosa la votación
         votacion_exitosa = True
 
-        # Paso 3: Solo hacer clic en "Ver resultados" si los pasos anteriores fueron exitosos
-        if votacion_exitosa:
-            ver_resultados_button = wait.until(
-                EC.element_to_be_clickable(
-                    (
-                        By.XPATH,
-                        "//button[contains(@class, 'logButton') and contains(text(), 'Ver resultados')]",
-                    )
-                )
-            )
-            actions.move_to_element(ver_resultados_button).click().perform()
-            time.sleep(4)  # Espera para que los resultados se muestren
-
         # Cerrar el navegador completo después de completar la votación exitosa
         driver.quit()
 
